@@ -1,7 +1,7 @@
 # The YouTube agent skill
 
-Eleven Claude skills that run a YouTube channel. Free, MIT, no signup, no API key, nothing to
-connect.
+Twelve Claude skills that run a YouTube channel. Free, MIT, no signup. Eleven need no API key and
+nothing to connect; `/yt-host` is the exception and says so.
 
 One of them writes your script off 21 hook formulas and scores the hook before you waste a take on
 it. One lints the title and the thumbnail as a single pairing, because writing them separately is
@@ -38,7 +38,7 @@ Or as a plugin:
 ```
 
 Project-local instead of global: copy the same folders into your repo's `.claude/skills/`. No Claude
-Code at all? Paste any single `SKILL.md` at the top of a chat and it runs as a mode. You lose the six
+Code at all? Paste any single `SKILL.md` at the top of a chat and it runs as a mode. You lose the seven
 Python tools, which is most of the point of `/yt-script`, `/yt-retention` and `/yt-edit`, but the
 rest works.
 
@@ -47,7 +47,7 @@ Then spend ten minutes on [`templates/voice.md`](templates/voice.md). Copy it to
 my voice.md from these". Every skill reads that file. It matters more here than anywhere else,
 because you have to say the words out loud.
 
-## The eleven
+## The twelve
 
 | command | what it does |
 | --- | --- |
@@ -62,10 +62,12 @@ because you have to say the words out loud.
 | `/yt-seo` | The description, the tags that are worth having, and the three queries this should win. |
 | `/yt-chapters` | Chapters from a transcript, validated against YouTube's own rules so they render. |
 | `/yt-audit` | The whole channel, ending in ONE fix rather than twenty. |
+| `/yt-host` | The same host in every video: one approved portrait and voice, turned into talking clips, each checked against the real face and teeth. Needs a sync.so key and ffprobe; paid per second. |
 
-## The six tools
+## The seven tools
 
-Every one of these runs on a clean Python 3 with no dependencies. They are the reason the skills are
+Every one of these runs on a clean Python 3 with no Python dependencies (`avatar.py` also calls
+ffprobe and a paid API). They are the reason the skills are
 not just prompts.
 
 ```bash
@@ -75,6 +77,7 @@ python3 skills/yt-edit/deadair.py transcript.srt               # edit decision l
 python3 skills/yt-chapters/chapters.py transcript.srt          # validated chapters
 python3 skills/yt-retention/retention.py retention.csv         # where they left, and why
 python3 skills/yt-viral/swipe.py collected.json --min 2.0      # outliers by own-channel multiple
+python3 skills/yt-host/avatar.py line.mp3 clip.mp4 [--go]       # talking host from the approved portrait
 ```
 
 ## The fine print
