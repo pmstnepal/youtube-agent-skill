@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PMST Channel Plan</title>
+<style>
+  :root {
+    --bg: #faf8f6; --surface: #ffffff; --surface-2: #f3efeb; --text: #1f1b18; --muted: #6b625b;
+    --border: #e6dfd8; --accent: #fe5252; --accent-soft: #ffe7e7; --ok: #1f8a5b; --ok-soft: #e3f4ec;
+    --warn: #a86400; --warn-soft: #fff2dc; --bar-bg: #ece6e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151312; --surface: #1e1b19; --surface-2: #262220; --text: #f1ece8; --muted: #a59b93;
+      --border: #3a3431; --accent: #ff6b6b; --accent-soft: #3a2224; --ok: #4cc58f; --ok-soft: #1c3229;
+      --warn: #f0b04a; --warn-soft: #3a2e1a; --bar-bg: #34302d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151312; --surface: #1e1b19; --surface-2: #262220; --text: #f1ece8; --muted: #a59b93;
+    --border: #3a3431; --accent: #ff6b6b; --accent-soft: #3a2224; --ok: #4cc58f; --ok-soft: #1c3229;
+    --warn: #f0b04a; --warn-soft: #3a2e1a; --bar-bg: #34302d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between;
+    border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 8px; }
+  h1 { margin: 0; font-size: 1.7rem; letter-spacing: -0.01em; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); margin: 4px 0 0; }
+  h2 { font-size: 1.25rem; margin: 40px 0 12px; }
+  h3 { font-size: 1.05rem; margin: 0 0 6px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+  .small { font-size: .875rem; }
+  nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 0; }
+  nav a { color: var(--text); text-decoration: none; font-size: .875rem; padding: 5px 10px;
+    border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+  nav a:hover { border-color: var(--accent); }
+  button { font: inherit; font-size: .85rem; cursor: pointer; color: var(--text); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; }
+  button:hover { border-color: var(--accent); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .grid { display: grid; gap: 12px; }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .stat b { display: block; font-size: 1.6rem; line-height: 1.2; }
+  .stat span { color: var(--muted); font-size: .85rem; }
+  .callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 14px; border-radius: 8px; }
+  .callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .callout.ok { border-color: var(--ok); background: var(--ok-soft); }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tbl { overflow-x: auto; }
+  .tag { display: inline-block; font-size: .72rem; padding: 2px 8px; border-radius: 999px;
+    background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); white-space: nowrap; }
+  .tag.hot { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .tag.new { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+  .series { border-top: 4px solid var(--accent); }
+  .series.music { border-top-color: #8a6cf0; }
+  .series .who { color: var(--muted); font-size: .85rem; margin-bottom: 8px; }
+  ul.plain { margin: 0; padding-left: 18px; }
+  ul.plain li { margin: 3px 0; }
+
+  /* progress */
+  .bar { height: 10px; background: var(--bar-bg); border-radius: 999px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 999px;
+    transition: width .3s ease; }
+  .bar.big { height: 16px; }
+  .progress-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+  .progress-head b { font-variant-numeric: tabular-nums; }
+  .overall { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0; border-bottom: 1px solid var(--border); }
+
+  .phase { margin-bottom: 14px; }
+  .phase summary { list-style: none; cursor: pointer; }
+  .phase summary::-webkit-details-marker { display: none; }
+  .phase .ph-title { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; margin-bottom: 8px; }
+  .phase .ph-title h3 { margin: 0; }
+  .tasks { list-style: none; margin: 12px 0 0; padding: 0; }
+  .tasks li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px dashed var(--border); }
+  .tasks input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); flex: none; }
+  .tasks label { cursor: pointer; flex: 1; }
+  .tasks .skill { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; color: var(--accent); white-space: nowrap; }
+  .tasks li.done label { color: var(--muted); text-decoration: line-through; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .85em; background: var(--surface-2);
+    padding: 1px 5px; border-radius: 4px; }
+  .flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .85rem; }
+  .flow span { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+  .flow span.you { border-style: dashed; color: var(--muted); }
+  .flow em { color: var(--muted); font-style: normal; }
+  footer { margin-top: 48px; color: var(--muted); font-size: .8rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>PMST US Nepal: <span>Music · Stories · Tech</span></h1>
+    <p class="sub">Channel relaunch plan and progress tracker. Channel snapshot taken 23 Oct 2026.</p>
+  </div>
+  <div>
+    <button id="theme">Toggle theme</button>
+    <button id="reset">Reset progress</button>
+  </div>
+</header>
+<nav>
+  <a href="#snapshot">Snapshot</a><a href="#lessons">What the data says</a><a href="#concept">New concept</a>
+  <a href="#series">Series</a><a href="#time">Time &amp; AI</a><a href="#weekly">Routine</a><a href="#roadmap">Roadmap</a>
+  <a href="#topics">Topic bank</a><a href="#rules">Rules</a>
+</nav>
+
+<div class="overall" id="overall">
+  <div class="progress-head"><span><b>Overall progress</b> <span class="muted small" id="overall-count"></span></span><b id="overall-pct">0%</b></div>
+  <div class="bar big"><i id="overall-bar"></i></div>
+</div>
+
+<!-- SNAPSHOT -->
+<h2 id="snapshot">1. Where the channel is today</h2>
+<div class="grid g4">
+  <div class="card stat"><b>196K</b><span>subscribers</span></div>
+  <div class="card stat"><b>166</b><span>videos</span></div>
+  <div class="card stat"><b>Jun 2024</b><span>last upload (~16 months ago)</span></div>
+  <div class="card stat"><b>1K–25K</b><span>typical views per video</span></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <h3>Best and weakest of the latest 30 videos</h3>
+  <div class="tbl"><table>
+    <tr><th>Video</th><th>Type</th><th class="num">Views</th></tr>
+    <tr><td>MAHA SAGAR | Nima Rumba | Celebrating 30+ Years</td><td><span class="tag hot">Music, big name</span></td><td class="num">159K</td></tr>
+    <tr><td>Karaoke and Lyrics: Hey Kancha Thattai Ma | Narayan Gopal</td><td><span class="tag hot">Karaoke, search</span></td><td class="num">38K</td></tr>
+    <tr><td>Rajshree Shrestha | Mrs Washington DC Tourism 2024</td><td><span class="tag">Community</span></td><td class="num">24K</td></tr>
+    <tr><td>Live Interview with Prashant Tamang (Indian Idol 3 winner)</td><td><span class="tag hot">Interview, big name</span></td><td class="num">22K</td></tr>
+    <tr><td>Boom Boom Bang 2.0 | Rocky Sunar | NepHop</td><td><span class="tag">Music</span></td><td class="num">18K</td></tr>
+    <tr><td>The Shree Show EP 1–3 (41 min – 1h22m)</td><td><span class="tag">Long interview</span></td><td class="num">1.2K–2.7K</td></tr>
+    <tr><td>Boss RC-500 Loop Station Review</td><td><span class="tag new">Music-tech</span></td><td class="num">1K</td></tr>
+    <tr><td>Tenzing's Show interviews (1–2 hours each)</td><td><span class="tag">Long interview</span></td><td class="num">566–3.6K</td></tr>
+    <tr><td>Travel vlogs (NYC, Niagara, Baltimore)</td><td><span class="tag">Vlog</span></td><td class="num">361–1.6K</td></tr>
+  </table></div>
+  <p class="muted small" style="margin:10px 0 0">Source: public channel page and RSS feed. View counts are rounded by YouTube.</p>
+</div>
+
+<!-- LESSONS -->
+<h2 id="lessons">2. What the data says</h2>
+<div class="grid g2">
+  <div class="card"><h3>✅ Famous names pull views</h3><p class="small">Nima Rumba and Prashant Tamang brought 10–50× the views of other videos. <b>For tech: interview well-known Nepalis working in tech.</b></p></div>
+  <div class="card"><h3>✅ Search content lasts for years</h3><p class="small">A 4-year-old karaoke video still has 38K views. People search for it. <b>Tech tutorials work the same way.</b></p></div>
+  <div class="card"><h3>⚠️ Most subscribers aren't watching anymore</h3><p class="small">196K subscribers but most videos get 1–5% of that. The audience has gone quiet after long gaps. <b>You need steady uploads to win them back, not one big video.</b></p></div>
+  <div class="card"><h3>⚠️ 1–2 hour interviews don't work as uploads</h3><p class="small">Full recorded shows get under 4K views. <b>Keep long interviews to 20–30 min and cut the best moments into Shorts.</b></p></div>
+  <div class="card"><h3>⚠️ Uploads come in bursts</h3><p class="small">Several videos in a week, then months of nothing. YouTube's own rule of thumb (and <code>/yt-plan</code>): steady beats lots.</p></div>
+  <div class="card"><h3>💡 Tech is already there</h3><p class="small">The RC-500 review shows music gear and tech already fit the channel. <b>Music + tech is your natural bridge.</b></p></div>
+</div>
+
+<!-- CONCEPT -->
+<h2 id="concept">3. The new concept</h2>
+<div class="callout">
+  <p><b>"PMST US Nepal: Music · Stories · Tech."</b> A channel connecting Nepalis in the US and Nepal through music, real stories and the technology shaping the next 10 years.</p>
+  <p class="small" style="margin:0">Same channel, organized into <b>clear series, each with its own playlist</b>, so every viewer finds the part they came for and YouTube learns who to show each series to.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+<pre style="margin:0;overflow-x:auto;font-size:.8rem;line-height:1.45">
+                    PMST US NEPAL  (one channel, 196K)
+                                 │
+     ┌────────────────┬──────────┼──────────────┬─────────────────┐
+     │                │          │              │                 │
+  🎵 MUSIC        🎤 STORIES   🎛 BRIDGE      💻 TECH            🎬 FUTURE
+  (existing)     (existing)   music + tech    (new)             (new, film-style)
+  music videos   interviews   AI music,      AI Sathi,          Nepal 2035
+  karaoke        short films  studio gear    Digital Suraksha,  short films
+                                             Kamai Online,
+                                             Nepali in Tech
+     └────── old audience ──────┘  └──── gets them watching ────┘  └─ new audience ─┘
+</pre>
+</div>
+
+<!-- SERIES -->
+<h2 id="series">4. The playlists (series)</h2>
+<div class="grid g2">
+  <div class="card series music"><h3>🎵 PMST Music + Karaoke</h3><div class="who">Existing · 1 per month, volunteer-made · keeps the old audience</div>
+    <p class="small">Music videos and <b>karaoke/lyrics of classic songs</b> (your best long-term performer). Low effort, high search value.</p></div>
+  <div class="card series music"><h3>🎛 Music Tech Lab <span class="tag new">bridge</span></h3><div class="who">New · you hands-on · 1 every 2 months</div>
+    <p class="small">AI music tools, home studio on a budget, loop stations, AI vocals. <b>Gives your music fans a reason to watch tech.</b></p></div>
+  <div class="card series"><h3>🤖 AI Sathi</h3><div class="who">New · main tech pillar · 1 per month · voice-over OK</div>
+    <p class="small">AI in daily life and work, in plain Nepali. Tools, how-tos, "will AI take this job?".</p></div>
+  <div class="card series"><h3>🎤 Nepali in Tech</h3><div class="who">New · reuses your interview format · 1 per month by video call</div>
+    <p class="small">20–30 min interviews with Nepali engineers, founders and AI people in the US and Nepal. Book well-known guests first.</p></div>
+  <div class="card series"><h3>🛡 Digital Suraksha</h3><div class="who">New · 1 every 2 months · voice-over OK</div>
+    <p class="small">Online scams, hacked accounts, deepfake calls: targeting Nepalis in the US and Nepal. Very shareable.</p></div>
+  <div class="card series"><h3>💼 Kamai Online</h3><div class="who">New · 1 every 2 months · screen + voice</div>
+    <p class="small">Tech careers, freelancing, remote work, learning to code: honest roadmaps, no get-rich-quick.</p></div>
+  <div class="card series"><h3>🎬 Nepal 2035</h3><div class="who">New · film-style · 1 per quarter, needs a volunteer crew</div>
+    <p class="small">Short films set in a future Nepal (AI doctor in a village, robot farming, EV Kathmandu), followed by the real tech explained. <b>Your short-film skills make this unique.</b></p></div>
+  <div class="card series"><h3>⚡ Shorts</h3><div class="who">Every week · 2–3 per week</div>
+    <p class="small">Cut from every long video with <code>/yt-shorts</code>. Also reuse old interview gold moments.</p></div>
+</div>
+
+<!-- WEEKLY -->
+<h2 id="time">5. Time, people and AI (part-time mode)</h2>
+<div class="callout warn">
+  <p><b>Full-time job comes first.</b> Before launching, read your employer's rules on <b>outside activities and social media</b>. Banks usually require you to disclose or get approval for outside work, especially paid work. Never name or discuss your employer on the channel, and stay away from investment or financial-advice topics.</p>
+</div>
+
+<div class="grid g4" style="margin-top:12px">
+  <div class="card stat"><b>6–8 h</b><span>your time per week (target)</span></div>
+  <div class="card stat"><b>2</b><span>long videos per month</span></div>
+  <div class="card stat"><b>2–3</b><span>Shorts per week</span></div>
+  <div class="card stat"><b>1 day</b><span>batch recording, every 2 weeks</span></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <h3>Who does what</h3>
+  <div class="tbl"><table>
+    <tr><th>Job</th><th>You</th><th>AI</th><th>PMST volunteers</th></tr>
+    <tr><td>Topic research</td><td>approve</td><td><code>/yt-viral</code> <code>/yt-plan</code></td><td></td></tr>
+    <tr><td>Script</td><td>add your opinion, approve</td><td><code>/yt-script</code> drafts it</td><td></td></tr>
+    <tr><td>On-camera intro + outro</td><td><b>always you</b></td><td></td><td>camera help</td></tr>
+    <tr><td>Main narration (explainers)</td><td>sometimes</td><td>voice-over in your cloned voice</td><td></td></tr>
+    <tr><td>Interviews (Nepali in Tech)</td><td><b>always you</b>, by video call</td><td><code>/yt-chapters</code></td><td>book guests</td></tr>
+    <tr><td>Screen recordings, demos</td><td>record</td><td></td><td></td></tr>
+    <tr><td>Editing</td><td>final check</td><td><code>/yt-edit</code> cut list, auto captions</td><td><b>editor</b></td></tr>
+    <tr><td>Title, thumbnail, description</td><td>approve</td><td><code>/yt-package</code> <code>/yt-seo</code></td><td>thumbnail design</td></tr>
+    <tr><td>Shorts</td><td></td><td><code>/yt-shorts</code> picks the moments</td><td>cut + schedule</td></tr>
+    <tr><td>Comments</td><td>approve replies</td><td><code>/yt-comment</code> drafts</td><td></td></tr>
+    <tr><td>Upload / publish</td><td><b>always you</b></td><td></td><td></td></tr>
+  </table></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <h3>The "face sandwich": how AI voice-over stays personal</h3>
+<pre style="margin:0 0 10px;overflow-x:auto;font-size:.8rem;line-height:1.45">
+ ┌──────────────┐ ┌──────────────────────────────────┐ ┌──────────────┐
+ │  YOU on cam  │ │  middle: screen recording / b-roll │ │  YOU on cam  │
+ │  15–30 sec   │ │  narration = your voice OR clone   │ │  15–30 sec   │
+ │  hook + why  │ │  (script approved by you)          │ │  opinion+ask │
+ └──────────────┘ └──────────────────────────────────┘ └──────────────┘
+   record 4 intros + 4 outros in one sitting = a month of videos
+</pre>
+  <ul class="plain small">
+    <li><b>Be open about it.</b> Tick YouTube's "altered or synthetic content" box when a realistic AI voice or visual is used. Don't try to hide AI. If viewers find out on their own, you lose their trust, and hidden AI also risks YouTube's rules.</li>
+    <li><b>Test the clone in Nepali first.</b> Voice-clone tools are strongest in English; Nepali quality varies. Compare the clone with your real voice before relying on it.</li>
+    <li><b>Lock the voice account.</b> Use a strong password and 2-factor login. A clone of your voice is a fraud risk, especially since many banks use voice checks.</li>
+    <li><b>Your opinion is the product.</b> AI drafts; every script needs at least one real experience or view of your own.</li>
+  </ul>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <h3>Which series fit which mode</h3>
+  <div class="tbl"><table>
+    <tr><th>Series</th><th>Part-time mode (now)</th><th>Full-time mode (later)</th></tr>
+    <tr><td>🤖 AI Sathi</td><td>Face sandwich + voice-over</td><td>Fully on camera, weekly</td></tr>
+    <tr><td>🛡 Digital Suraksha</td><td>Face sandwich + voice-over</td><td>Add real victim stories</td></tr>
+    <tr><td>💼 Kamai Online</td><td>Face sandwich + screen recording</td><td>Live Q&amp;A sessions</td></tr>
+    <tr><td>🎤 Nepali in Tech</td><td>Video-call interview, 1 a month</td><td>In-person studio interviews</td></tr>
+    <tr><td>🎛 Music Tech Lab</td><td>You, hands-on, 1 every 2 months</td><td>Monthly</td></tr>
+    <tr><td>🎬 Nepal 2035</td><td>Only with a volunteer crew, 1 per quarter</td><td>Every 2 months</td></tr>
+    <tr><td>🎵 Karaoke</td><td>Volunteer-made, 1 a month</td><td>Same</td></tr>
+  </table></div>
+</div>
+
+<h2 id="weekly">6. Two-week routine (part-time)</h2>
+<div class="card">
+  <div class="flow">
+    <span>/yt-viral</span><em>→</em><span>/yt-script</span><em>→</em><span class="you">record (you)</span><em>→</em>
+    <span>/yt-edit</span><em>→</em><span>/yt-package</span><em>→</em><span>/yt-seo + /yt-chapters</span><em>→</em>
+    <span class="you">upload (you)</span><em>→</em><span>/yt-shorts</span><em>→</em><span>/yt-comment</span>
+  </div>
+  <div class="tbl" style="margin-top:12px"><table>
+    <tr><th>When</th><th>Task</th><th>Time</th><th>Skill</th></tr>
+    <tr><td>Week 1, weekday evening</td><td>Pick topic, approve AI script</td><td>1 h</td><td><code>/yt-viral</code> <code>/yt-script</code></td></tr>
+    <tr><td>Week 1, weekend</td><td><b>Batch day:</b> intros/outros, screen recordings, narration (or clone)</td><td>3–4 h</td><td>you</td></tr>
+    <tr><td>Week 2, weekday</td><td>Volunteer editor cuts the video from the cut list</td><td>0 h for you</td><td><code>/yt-edit</code> <code>/yt-chapters</code></td></tr>
+    <tr><td>Week 2, evening</td><td>Final check, title, thumbnail, upload</td><td>1 h</td><td><code>/yt-package</code> <code>/yt-seo</code></td></tr>
+    <tr><td>Week 2, weekend</td><td>Approve Shorts + comment replies, check retention</td><td>1 h</td><td><code>/yt-shorts</code> <code>/yt-comment</code> <code>/yt-retention</code></td></tr>
+  </table></div>
+</div>
+
+<!-- ROADMAP -->
+<h2 id="roadmap">7. 14-week roadmap <span class="muted small">(tick tasks as you finish them; progress is saved in this browser)</span></h2>
+<div id="phases"></div>
+
+<!-- TOPICS -->
+<h2 id="topics">8. Topic bank <span class="muted small">(tick when published)</span></h2>
+<p class="muted small">Working titles. Before using one, run it through <code>/yt-package</code>, and check the hook with <code>/yt-script</code>.</p>
+<div id="topicbank" class="grid g2"></div>
+
+<!-- RULES -->
+<h2 id="rules">9. Rules we keep</h2>
+<div class="grid g2">
+  <div class="callout ok"><b>Do</b><ul class="plain small">
+    <li>Two long videos a month, on a fixed schedule. Consistency beats volume.</li>
+    <li>Your face opens and closes every video. Label realistic AI voice/visuals in YouTube Studio.</li>
+    <li>Every video belongs to one playlist series.</li>
+    <li>Keep interviews 20–30 min; big names first.</li>
+    <li>Your own voice or face, real experience, real tests.</li>
+    <li>Review every video's retention before making the next.</li>
+  </ul></div>
+  <div class="callout warn"><b>Don't</b><ul class="plain small">
+    <li>No crypto trading or "earn crypto" videos. Nepal Rastra Bank has declared crypto activity illegal in Nepal; verify the current rules first.</li>
+    <li>No mass-produced AI videos. YouTube can stop paying channels for repetitive or inauthentic content.</li>
+    <li>No get-rich-quick promises.</li>
+    <li>No 2-hour unedited uploads.</li>
+    <li>No invented numbers in scripts. If we don't have the figure, leave it out.</li>
+    <li>No mention of your employer, and no investment or financial advice.</li>
+  </ul></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <h3>Open decisions</h3>
+  <ul class="plain small">
+    <li>Language: Nepali, English, or mixed (Nepali speech + English titles, like the current channel)?</li>
+    <li>Presenter: you on camera, a co-host, or voice-over?</li>
+    <li>Series names: are "AI Sathi", "Digital Suraksha", "Kamai Online" the right names for your audience?</li>
+  </ul>
+</div>
+
+<footer>
+  Built with the youtube-agent-skill pack. Progress is stored in this browser only (localStorage). Clearing browser data or opening on another computer starts fresh.
+</footer>
+</div>
+
+<script>
+const PHASES = [
+  { id: "p0", title: "Phase 0: Clean-up and setup", when: "Weeks 1–2", tasks: [
+    ["Read your employer's outside-activity and social-media policy; disclose if required", ""],
+    ["Decide language and presenter (see Open decisions)", ""],
+    ["Recruit PMST volunteers: 1 video editor, 1 thumbnail designer, 1 guest booker", ""],
+    ["Install the skills and write voice.md from 3 of your videos", "voice.md"],
+    ["Test a voice clone in Nepali and English; compare with your real voice", ""],
+    ["Update channel description: Music · Stories · Tech", ""],
+    ["New banner + profile showing the three sides", ""],
+    ["Create playlists: Music Tech Lab, AI Sathi, Nepali in Tech, Digital Suraksha, Kamai Online, Nepal 2035", ""],
+    ["Sort old videos into playlists (Music, Karaoke, Tenzing's Show, Shree Show, Short Films, Travel)", ""],
+    ["Set up recording: OBS (screen), DaVinci Resolve (edit), USB mic", ""],
+    ["Community post: \"We're coming back, here's what's new\"", ""],
+  ]},
+  { id: "p1", title: "Phase 1: Comeback", when: "Weeks 3–6", tasks: [
+    ["Batch day 1: record 4 intros + 4 outros (a month of face-sandwich videos)", ""],
+    ["Comeback video: why we were away and what's coming (fully on camera)", "/yt-script"],
+    ["Music Tech Lab EP1: \"AI can now make a Nepali song. We tested it.\"", "/yt-script"],
+    ["Check every title and thumbnail before upload", "/yt-package"],
+    ["2–3 Shorts per week, including best moments of old interviews (Prashant Tamang, Saigrace)", "/yt-shorts"],
+    ["Reply to comments within the first hours of each upload", "/yt-comment"],
+  ]},
+  { id: "p2", title: "Phase 2: Build the series", when: "Weeks 7–10", tasks: [
+    ["Digital Suraksha EP1: \"7 online scams targeting Nepalis right now\" (face sandwich + voice-over)", "/yt-script"],
+    ["Nepali in Tech EP1: first interview by video call (20–30 min)", "/yt-chapters"],
+    ["Karaoke + lyrics of one classic song (volunteer-made)", "/yt-seo"],
+    ["Retention review of every Phase 1 video", "/yt-retention"],
+    ["Plan the next month around actual hours available", "/yt-plan"],
+  ]},
+  { id: "p3", title: "Phase 3: Steady rhythm and review", when: "Weeks 11–14", tasks: [
+    ["AI Sathi EP1: \"5 AI tools every Nepali student should use\" (face sandwich)", "/yt-script"],
+    ["Nepali in Tech EP2", "/yt-chapters"],
+    ["Write Nepal 2035 EP1 script; shoot only once a volunteer crew is ready", "/yt-script"],
+    ["Find what's working in the tech niche to plan the next 3 months", "/yt-viral"],
+    ["Full channel audit: get the ONE fix", "/yt-audit"],
+    ["Pick the best-performing series and give it more slots next quarter", ""],
+  ]},
+];
+
+const TOPICS = [
+  { name: "🎛 Music Tech Lab", items: [
+    "AI can now make a Nepali song. We tested it.", "Home studio under $300: what you actually need",
+    "Can AI clean up an old Narayan Gopal recording?", "Loop station vs laptop: which should a beginner buy?",
+    "How Nepali singers can release music on Spotify themselves"]},
+  { name: "🤖 AI Sathi", items: [
+    "5 AI tools every Nepali student should use", "Using ChatGPT / Claude in Nepali, properly",
+    "Will AI take your job? 10 jobs checked", "I let AI plan my whole week", "AI for small shops and restaurants in Nepal"]},
+  { name: "🎤 Nepali in Tech", items: [
+    "From Nepal to a US tech job: one engineer's real path", "A Nepali AI founder on the next 10 years",
+    "Women in tech from Nepal", "Nepali developers building for the world, from Kathmandu",
+    "A Nepali nurse who moved into health tech"]},
+  { name: "🛡 Digital Suraksha", items: [
+    "7 online scams targeting Nepalis right now", "Facebook hacked: what to do in the first 10 minutes",
+    "Deepfake voice calls: how scammers copy your family", "Remittance and wallet scams to watch for",
+    "Protect your parents' phone in 15 minutes"]},
+  { name: "💼 Kamai Online", items: [
+    "Tech jobs a Nepali can get from home: honest roadmap", "Learn to code from zero in 6 months",
+    "Freelancing skills that will still pay in 2035", "US tech career for Nepali immigrants: where to start",
+    "Cloud/AWS explained for beginners (from someone who builds it)"]},
+  { name: "🎬 Nepal 2035", items: [
+    "EP1: A village clinic with an AI doctor", "EP2: Kathmandu without petrol",
+    "EP3: The farmer and the drone", "EP4: A school where every child has an AI tutor",
+    "EP5: Coming home from abroad, by video call or by choice?"]},
+];
+
+const KEY = "pmst-yt-plan-v2";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+function taskItem(id, text, skill) {
+  const li = document.createElement("li");
+  const cb = Object.assign(document.createElement("input"), { type: "checkbox", id });
+  cb.checked = !!state[id];
+  const label = document.createElement("label");
+  label.htmlFor = id; label.textContent = text + " ";
+  if (skill) { const s = document.createElement("span"); s.className = "skill"; s.textContent = skill; label.appendChild(s); }
+  li.append(cb, label);
+  li.classList.toggle("done", cb.checked);
+  cb.addEventListener("change", () => { state[id] = cb.checked; li.classList.toggle("done", cb.checked); save(); update(); });
+  return li;
+}
+
+function progressBlock(title, meta) {
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `<div class="ph-title"><h3></h3><span class="muted small"></span></div>
+    <div class="progress-head"><span class="muted small cnt"></span><b class="pct">0%</b></div><div class="bar"><i></i></div>`;
+  wrap.querySelector("h3").textContent = title;
+  wrap.querySelector(".ph-title span").textContent = meta;
+  return wrap;
+}
+
+const phasesEl = document.getElementById("phases");
+PHASES.forEach(p => {
+  const card = document.createElement("details");
+  card.className = "card phase"; card.open = true; card.dataset.group = p.id;
+  const sum = document.createElement("summary");
+  sum.appendChild(progressBlock(p.title, p.when));
+  const ul = document.createElement("ul"); ul.className = "tasks";
+  p.tasks.forEach(([t, s], i) => ul.appendChild(taskItem(`${p.id}-${i}`, t, s)));
+  card.append(sum, ul); phasesEl.appendChild(card);
+});
+
+const topicEl = document.getElementById("topicbank");
+TOPICS.forEach((g, gi) => {
+  const card = document.createElement("div");
+  card.className = "card"; card.dataset.group = "t" + gi;
+  card.appendChild(progressBlock(g.name, g.items.length + " ideas"));
+  const ul = document.createElement("ul"); ul.className = "tasks";
+  g.items.forEach((t, i) => ul.appendChild(taskItem(`t${gi}-${i}`, t, "")));
+  card.appendChild(ul); topicEl.appendChild(card);
+});
+
+function update() {
+  document.querySelectorAll("[data-group]").forEach(g => {
+    const boxes = g.querySelectorAll("input[type=checkbox]");
+    const done = [...boxes].filter(b => b.checked).length;
+    const pct = boxes.length ? Math.round(done / boxes.length * 100) : 0;
+    g.querySelector(".pct").textContent = pct + "%";
+    g.querySelector(".cnt").textContent = `${done} of ${boxes.length} done`;
+    g.querySelector(".bar > i").style.width = pct + "%";
+  });
+  const all = document.querySelectorAll("#phases input[type=checkbox]");
+  const done = [...all].filter(b => b.checked).length;
+  const pct = all.length ? Math.round(done / all.length * 100) : 0;
+  document.getElementById("overall-pct").textContent = pct + "%";
+  document.getElementById("overall-count").textContent = `roadmap: ${done} of ${all.length} tasks`;
+  document.getElementById("overall-bar").style.width = pct + "%";
+}
+update();
+
+document.getElementById("reset").addEventListener("click", () => {
+  if (!confirm("Clear all ticked tasks?")) return;
+  state = {}; save();
+  document.querySelectorAll("input[type=checkbox]").forEach(b => { b.checked = false; b.closest("li").classList.remove("done"); });
+  update();
+});
+document.getElementById("theme").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+});
+</script>
+</body>
+</html>
