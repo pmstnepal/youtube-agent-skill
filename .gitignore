@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# raw camera footage and analysis output - never commit
+footage/
