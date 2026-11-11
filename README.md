@@ -38,7 +38,7 @@ Or as a plugin:
 ```
 
 Project-local instead of global: copy the same folders into your repo's `.claude/skills/`. No Claude
-Code at all? Paste any single `SKILL.md` at the top of a chat and it runs as a mode. You lose the seven
+Code at all? Paste any single `SKILL.md` at the top of a chat and it runs as a mode. You lose the nine
 Python tools, which is most of the point of `/yt-script`, `/yt-retention` and `/yt-edit`, but the
 rest works.
 
@@ -64,10 +64,10 @@ because you have to say the words out loud.
 | `/yt-audit` | The whole channel, ending in ONE fix rather than twenty. |
 | `/yt-host` | The same host in every video: one approved portrait and voice, turned into talking clips, each checked against the real face and teeth. Needs a sync.so key and ffprobe; paid per second. |
 
-## The seven tools
+## The nine tools
 
-Every one of these runs on a clean Python 3 with no Python dependencies (`avatar.py` also calls
-ffprobe and a paid API). They are the reason the skills are
+The first six run on a clean Python 3 with no dependencies. The three `/yt-host` tools need more:
+`avatar.py` calls ffprobe and a paid API, `ai_particles.py` and `logo.py` need numpy, Pillow and ffmpeg. They are the reason the skills are
 not just prompts.
 
 ```bash
@@ -78,6 +78,8 @@ python3 skills/yt-chapters/chapters.py transcript.srt          # validated chapt
 python3 skills/yt-retention/retention.py retention.csv         # where they left, and why
 python3 skills/yt-viral/swipe.py collected.json --min 2.0      # outliers by own-channel multiple
 python3 skills/yt-host/avatar.py line.mp3 clip.mp4 [--go]       # talking host from the approved portrait
+python3 skills/yt-host/ai_particles.py ai.wav out.mp4           # the AI as a 3D particle sphere
+python3 skills/yt-host/logo.py in.mp4 out.mp4 --outro          # animated logo: --intro, --outro, --badge
 ```
 
 ## The fine print
